@@ -12,7 +12,7 @@ struct capnpFile {
 	size_t contentLen;
 };
 
-void* parseSchemaFromFiles(const struct capnpFile* files, size_t filesLen, const char** paths, size_t pathsLen);
+void* parseSchemaFromFiles(const struct capnpFile* files, size_t filesLen, const struct capnpFile* imports, size_t importsLen, const char** paths, size_t pathsLen);
 
 void* findStructSchema(void* schemaPtr, char* name);
 
