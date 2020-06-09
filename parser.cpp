@@ -2,7 +2,7 @@
 
 #include "parser.h"
 
-void* parseSchemaFromFiles(const struct capnpFile* files, size_t filesLen, const char** paths, size_t pathsLen) {
+void* parseSchemaFromFiles(const struct capnpFile* files, size_t filesLen, const struct capnpFile* imports, size_t importsLen, const char** paths, size_t pathsLen) {
 	auto dir = kj::newInMemoryDirectory(kj::nullClock());
 	for (size_t i = 0; i < filesLen; i++) {
 		auto path = kj::Path::parse(files[i].path);
@@ -11,10 +11,18 @@ void* parseSchemaFromFiles(const struct capnpFile* files, size_t filesLen, const
 			->writeAll(arr.asBytes());
 	}
 
+	auto importDir = kj::newInMemoryDirectory(kj::nullClock());
+	for (size_t i = 0; i < importsLen; i++) {
+		auto path = kj::Path::parse(imports[i].path);
+		auto arr = kj::Array<const char>(imports[i].content, imports[i].contentLen, kj::NullArrayDisposer::instance);
+		importDir->openFile(path, kj::WriteMode::CREATE | kj::WriteMode::CREATE_PARENT)
+			->writeAll(arr.asBytes());
+	}
+	kj::FixedArray<const kj::ReadableDirectory*, 1> importPath;
+	importPath[0] = importDir.get();
+
 	auto schemas = new void*[pathsLen];
 	auto p = new capnp::SchemaParser;
-	kj::FixedArray<const kj::ReadableDirectory*, 1> importPath;
-	importPath[0] = dir.get();
 	for (size_t i = 0; i < pathsLen; i++) {
 		auto schema = new capnp::ParsedSchema;
 		*schema = p->parseFromDirectory(*dir, kj::Path::parse(paths[i]), importPath);

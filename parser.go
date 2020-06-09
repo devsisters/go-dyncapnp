@@ -56,7 +56,7 @@ func (s *Schema) Release() {
 	s.ptr = unsafe.Pointer(nil)
 }
 
-func ParseFromFiles(files map[string][]byte, paths []string) *ParsedSchemas {
+func ParseFromFiles(files map[string][]byte, imports map[string][]byte, paths []string) *ParsedSchemas {
 	cFiles := C.allocFiles(C.size_t(len(files)))
 	defer C.free(unsafe.Pointer(cFiles))
 
@@ -74,6 +74,23 @@ func ParseFromFiles(files map[string][]byte, paths []string) *ParsedSchemas {
 		}
 	}()
 
+	cImports := C.allocFiles(C.size_t(len(imports)))
+	defer C.free(unsafe.Pointer(cImports))
+
+	cImportSlice := (*[1 << 30]C.struct_capnpFile)(unsafe.Pointer(cImports))[:len(imports):len(imports)]
+	i = 0
+	for path, content := range imports {
+		cImportSlice[i].path = C.CString(path)
+		cImportSlice[i].content = (*C.char)(unsafe.Pointer(&content[0]))
+		cImportSlice[i].contentLen = C.size_t(len(content))
+		i++
+	}
+	defer func() {
+		for _, f := range cImportSlice {
+			C.free(unsafe.Pointer(f.path))
+		}
+	}()
+
 	cPathSlice := make([]*C.char, len(paths))
 	for i, path := range paths {
 		cPathSlice[i] = C.CString(path)
@@ -84,7 +101,7 @@ func ParseFromFiles(files map[string][]byte, paths []string) *ParsedSchemas {
 		}
 	}()
 
-	cSchemas := C.parseSchemaFromFiles(cFiles, C.size_t(len(cFileSlice)), &cPathSlice[0], C.size_t(len(cPathSlice)))
+	cSchemas := C.parseSchemaFromFiles(cFiles, C.size_t(len(cFileSlice)), cImports, C.size_t(len(cImportSlice)), &cPathSlice[0], C.size_t(len(cPathSlice)))
 	cSchemasSlice := (*[1 << 30]unsafe.Pointer)(cSchemas)[:len(paths):len(paths)]
 
 	pathSchemas := make(map[string]unsafe.Pointer, len(paths))
