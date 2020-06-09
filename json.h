@@ -9,16 +9,20 @@ extern "C" {
 struct byteArray {
 	char* arr;
 	size_t length;
-
 };
 
-struct byteArray jsonToBinary(void* schemaPtr, const char* json, size_t len);
+struct byteArray_result {
+	struct byteArray result;
+	const char* err;
+};
 
-struct byteArray jsonToPacked(void* schemaPtr, const char* json, size_t len);
+struct byteArray_result jsonToBinary(void* schemaPtr, const char* json, size_t len);
 
-struct byteArray binaryToJson(void* schemaPtr, const char* binary, size_t len);
+struct byteArray_result jsonToPacked(void* schemaPtr, const char* json, size_t len);
 
-struct byteArray packedToJson(void* schemaPtr, const char* binary, size_t len);
+struct byteArray_result binaryToJson(void* schemaPtr, const char* binary, size_t len);
+
+struct byteArray_result packedToJson(void* schemaPtr, const char* binary, size_t len);
 
 #ifdef __cplusplus
 }
