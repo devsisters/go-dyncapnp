@@ -13,37 +13,44 @@ struct capnpFile* allocFiles(size_t s) {
 */
 import "C"
 import (
+	"fmt"
 	"unsafe"
 )
 
 // Parsed .capnp schema files. MUST be .Release()'ed after use.
 type ParsedSchemas struct {
-	ptr   unsafe.Pointer
+	ptr   *unsafe.Pointer
 	paths map[string]unsafe.Pointer
 }
 
-func (s *ParsedSchemas) Get(path string, structName string) Schema {
+var ErrSchemaNotFound = fmt.Errorf("schema not found")
+
+func (s *ParsedSchemas) Get(path string, structName string) (*Schema, error) {
 	pt, ok := s.paths[path]
 	if !ok {
-		panic("given path not exists")
+		return nil, ErrSchemaNotFound
 	}
 
 	st := C.CString(structName)
 	defer C.free(unsafe.Pointer(st))
 
-	ptr := C.findStructSchema(pt, st)
-	if ptr == nil {
-		panic("given struct not found in the file")
+	res := C.findStructSchema(pt, st)
+	if res.err != nil {
+		defer C.free(unsafe.Pointer(res.err))
+		return nil, fmt.Errorf(C.GoString(res.err))
+	}
+	if res.schema == nil {
+		return nil, ErrSchemaNotFound
 	}
 
-	return Schema{
-		ptr: ptr,
-	}
+	return &Schema{
+		ptr: res.schema,
+	}, nil
 }
 
 func (s *ParsedSchemas) Release() {
 	C.releaseSchemas(s.ptr, C.size_t(len(s.paths)))
-	s.ptr = unsafe.Pointer(nil)
+	s.ptr = nil
 	s.paths = nil
 }
 
@@ -56,7 +63,7 @@ func (s *Schema) Release() {
 	s.ptr = unsafe.Pointer(nil)
 }
 
-func ParseFromFiles(files map[string][]byte, imports map[string][]byte, paths []string) *ParsedSchemas {
+func ParseFromFiles(files map[string][]byte, imports map[string][]byte, paths []string) (*ParsedSchemas, error) {
 	cFiles := C.allocFiles(C.size_t(len(files)))
 	defer C.free(unsafe.Pointer(cFiles))
 
@@ -101,8 +108,13 @@ func ParseFromFiles(files map[string][]byte, imports map[string][]byte, paths []
 		}
 	}()
 
-	cSchemas := C.parseSchemaFromFiles(cFiles, C.size_t(len(cFileSlice)), cImports, C.size_t(len(cImportSlice)), &cPathSlice[0], C.size_t(len(cPathSlice)))
-	cSchemasSlice := (*[1 << 30]unsafe.Pointer)(cSchemas)[:len(paths):len(paths)]
+	res := C.parseSchemaFromFiles(cFiles, C.size_t(len(cFileSlice)), cImports, C.size_t(len(cImportSlice)), &cPathSlice[0], C.size_t(len(cPathSlice)))
+	if res.err != nil {
+		err := fmt.Errorf(C.GoString(res.err))
+		C.free(unsafe.Pointer(res.err))
+		return nil, err
+	}
+	cSchemasSlice := (*[1 << 30]unsafe.Pointer)(unsafe.Pointer(res.schemas))[:len(paths):len(paths)]
 
 	pathSchemas := make(map[string]unsafe.Pointer, len(paths))
 	for i := range paths {
@@ -110,7 +122,7 @@ func ParseFromFiles(files map[string][]byte, imports map[string][]byte, paths []
 	}
 
 	return &ParsedSchemas{
-		ptr:   cSchemas,
+		ptr:   res.schemas,
 		paths: pathSchemas,
-	}
+	}, nil
 }

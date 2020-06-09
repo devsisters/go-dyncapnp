@@ -9,27 +9,33 @@ package dyncapnp
 */
 import "C"
 import (
+	"fmt"
 	"unsafe"
 )
 
-func readByteArray(arr C.struct_byteArray) []byte {
-	bs := C.GoBytes(unsafe.Pointer(arr.arr), C.int(arr.length))
-	C.free(unsafe.Pointer(arr.arr))
-	return bs
+func readByteArray(res C.struct_byteArray_result) ([]byte, error) {
+	if res.err != nil {
+		err := fmt.Errorf(C.GoString(res.err))
+		C.free(unsafe.Pointer(res.err))
+		return nil, err
+	}
+	bs := C.GoBytes(unsafe.Pointer(res.result.arr), C.int(res.result.length))
+	C.free(unsafe.Pointer(res.result.arr))
+	return bs, nil
 }
 
-func (s Schema) Encode(json []byte) []byte {
+func (s Schema) Encode(json []byte) ([]byte, error) {
 	return readByteArray(C.jsonToBinary(s.ptr, (*C.char)(unsafe.Pointer(&json[0])), C.size_t(len(json))))
 }
 
-func (s Schema) EncodePacked(json []byte) []byte {
+func (s Schema) EncodePacked(json []byte) ([]byte, error) {
 	return readByteArray(C.jsonToPacked(s.ptr, (*C.char)(unsafe.Pointer(&json[0])), C.size_t(len(json))))
 }
 
-func (s Schema) Decode(bin []byte) []byte {
+func (s Schema) Decode(bin []byte) ([]byte, error) {
 	return readByteArray(C.binaryToJson(s.ptr, (*C.char)(unsafe.Pointer(&bin[0])), C.size_t(len(bin))))
 }
 
-func (s Schema) DecodePacked(bin []byte) []byte {
+func (s Schema) DecodePacked(bin []byte) ([]byte, error) {
 	return readByteArray(C.packedToJson(s.ptr, (*C.char)(unsafe.Pointer(&bin[0])), C.size_t(len(bin))))
 }

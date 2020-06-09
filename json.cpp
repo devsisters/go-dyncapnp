@@ -17,62 +17,78 @@ byteArray cloneArray(const kj::ArrayPtr<capnp::byte>& ar) {
 	return b;
 }
 
-byteArray jsonToBinary(void* schemaPtr, const char* json, size_t len) {
-	auto schema = static_cast<capnp::ParsedSchema*>(schemaPtr);
-	kj::Array<const char> arr(json, len, kj::NullArrayDisposer::instance);
+byteArray_result jsonToBinary(void* schemaPtr, const char* json, size_t len) {
+	try {
+		auto schema = static_cast<capnp::ParsedSchema*>(schemaPtr);
+		kj::Array<const char> arr(json, len, kj::NullArrayDisposer::instance);
 
-	capnp::MallocMessageBuilder builder;
-	auto root = builder.initRoot<capnp::DynamicStruct>(schema->asStruct());
+		capnp::MallocMessageBuilder builder;
+		auto root = builder.initRoot<capnp::DynamicStruct>(schema->asStruct());
 
-	capnp::JsonCodec codec;
-	codec.decode(arr, root);
+		capnp::JsonCodec codec;
+		codec.decode(arr, root);
 
-	kj::VectorOutputStream os;
-	capnp::writeMessage(os, builder);
+		kj::VectorOutputStream os;
+		capnp::writeMessage(os, builder);
 
-	return cloneArray(os.getArray());
+		return {cloneArray(os.getArray()), nullptr};
+	} catch(const std::exception &e) {
+         return {{}, strdup(e.what())};
+    }
 }
 
-byteArray jsonToPacked(void* schemaPtr, const char* json, size_t len) {
-	auto schema = static_cast<capnp::ParsedSchema*>(schemaPtr);
-	kj::Array<const char> arr(json, len, kj::NullArrayDisposer::instance);
+byteArray_result jsonToPacked(void* schemaPtr, const char* json, size_t len) {
+	try {
+		auto schema = static_cast<capnp::ParsedSchema*>(schemaPtr);
+		kj::Array<const char> arr(json, len, kj::NullArrayDisposer::instance);
 
-	capnp::MallocMessageBuilder builder;
-	auto root = builder.initRoot<capnp::DynamicStruct>(schema->asStruct());
+		capnp::MallocMessageBuilder builder;
+		auto root = builder.initRoot<capnp::DynamicStruct>(schema->asStruct());
 
-	capnp::JsonCodec codec;
-	codec.decode(arr, root);
+		capnp::JsonCodec codec;
+		codec.decode(arr, root);
 
-	kj::VectorOutputStream os;
-	capnp::writePackedMessage(os, builder);
+		kj::VectorOutputStream os;
+		capnp::writePackedMessage(os, builder);
 
-	return cloneArray(os.getArray());
+		return {cloneArray(os.getArray()), nullptr};
+	} catch(const std::exception &e) {
+         return {{}, strdup(e.what())};
+    }
 }
 
-byteArray binaryToJson(void* schemaPtr, const char* binary, size_t len) {
-	auto schema = static_cast<capnp::ParsedSchema*>(schemaPtr);
+byteArray_result binaryToJson(void* schemaPtr, const char* binary, size_t len) {
+	try {
+		auto schema = static_cast<capnp::ParsedSchema*>(schemaPtr);
 
-	kj::Array<const char> arr(binary, len, kj::NullArrayDisposer::instance);
-	kj::ArrayInputStream is(arr.asBytes());
-	capnp::InputStreamMessageReader message(is);
-	auto root = message.getRoot<capnp::DynamicStruct>(schema->asStruct());
+		kj::Array<const char> arr(binary, len, kj::NullArrayDisposer::instance);
+		kj::ArrayInputStream is(arr.asBytes());
+		capnp::InputStreamMessageReader message(is);
+		auto root = message.getRoot<capnp::DynamicStruct>(schema->asStruct());
 
-	capnp::JsonCodec codec;
-	auto str = codec.encode(root);
+		capnp::JsonCodec codec;
+		auto str = codec.encode(root);
 
-	return cloneArray(str.asBytes());
+		return {cloneArray(str.asBytes()), nullptr};
+	} catch(const std::exception &e) {
+         return {{}, strdup(e.what())};
+    }
 }
 
-byteArray packedToJson(void* schemaPtr, const char* binary, size_t len) {
-	auto schema = static_cast<capnp::ParsedSchema*>(schemaPtr);
+byteArray_result packedToJson(void* schemaPtr, const char* binary, size_t len) {
+	try {
+		auto schema = static_cast<capnp::ParsedSchema*>(schemaPtr);
 
-	kj::Array<const char> arr(binary, len, kj::NullArrayDisposer::instance);
-	kj::ArrayInputStream is(arr.asBytes());
-	capnp::PackedMessageReader message(is);
-	auto root = message.getRoot<capnp::DynamicStruct>(schema->asStruct());
+		kj::Array<const char> arr(binary, len, kj::NullArrayDisposer::instance);
+		kj::ArrayInputStream is(arr.asBytes());
+		capnp::PackedMessageReader message(is);
+		auto root = message.getRoot<capnp::DynamicStruct>(schema->asStruct());
 
-	capnp::JsonCodec codec;
-	auto str = codec.encode(root);
+		capnp::JsonCodec codec;
+		auto str = codec.encode(root);
 
-	return cloneArray(str.asBytes());
+		return {cloneArray(str.asBytes()), nullptr};
+	} catch(const std::exception &e) {
+         return {{}, strdup(e.what())};
+    }
 }
