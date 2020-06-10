@@ -14,10 +14,12 @@ struct capnpFile* allocFiles(size_t s) {
 import "C"
 import (
 	"fmt"
+	"os"
+	"runtime"
 	"unsafe"
 )
 
-// Parsed .capnp schema files. MUST be .Release()'ed after use.
+// Parsed .capnp schema files. Should be .Release()'ed after use.
 type ParsedSchemas struct {
 	ptr   *unsafe.Pointer
 	paths map[string]unsafe.Pointer
@@ -28,7 +30,7 @@ var ErrSchemaNotFound = fmt.Errorf("schema not found")
 func (s *ParsedSchemas) Get(path string, structName string) (*Schema, error) {
 	pt, ok := s.paths[path]
 	if !ok {
-		return nil, ErrSchemaNotFound
+		return nil, os.ErrNotExist
 	}
 
 	st := C.CString(structName)
@@ -43,24 +45,35 @@ func (s *ParsedSchemas) Get(path string, structName string) (*Schema, error) {
 		return nil, ErrSchemaNotFound
 	}
 
-	return &Schema{
+	sc := &Schema{
 		ptr: res.schema,
-	}, nil
+	}
+	runtime.SetFinalizer(sc, (*Schema).Release)
+	return sc, nil
 }
 
 func (s *ParsedSchemas) Release() {
+	if s.ptr == nil {
+		return
+	}
 	C.releaseSchemas(s.ptr, C.size_t(len(s.paths)))
 	s.ptr = nil
 	s.paths = nil
+	runtime.SetFinalizer(s, nil)
 }
 
+// Schema of a Cap'n'proto type. Should be .Release()'ed after use.
 type Schema struct {
 	ptr unsafe.Pointer
 }
 
 func (s *Schema) Release() {
+	if s.ptr == nil {
+		return
+	}
 	C.releaseSchema(s.ptr)
-	s.ptr = unsafe.Pointer(nil)
+	s.ptr = nil
+	runtime.SetFinalizer(s, nil)
 }
 
 func ParseFromFiles(files map[string][]byte, imports map[string][]byte, paths []string) (*ParsedSchemas, error) {
@@ -121,8 +134,10 @@ func ParseFromFiles(files map[string][]byte, imports map[string][]byte, paths []
 		pathSchemas[paths[i]] = cSchemasSlice[i]
 	}
 
-	return &ParsedSchemas{
+	ps := &ParsedSchemas{
 		ptr:   res.schemas,
 		paths: pathSchemas,
-	}, nil
+	}
+	runtime.SetFinalizer(ps, (*ParsedSchemas).Release)
+	return ps, nil
 }
