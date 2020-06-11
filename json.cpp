@@ -33,8 +33,8 @@ byteArray_result jsonToBinary(void* schemaPtr, const char* json, size_t len) {
 
 		return {cloneArray(os.getArray()), nullptr};
 	} catch(const std::exception &e) {
-         return {{}, strdup(e.what())};
-    }
+		return {{}, strdup(e.what())};
+	}
 }
 
 byteArray_result jsonToPacked(void* schemaPtr, const char* json, size_t len) {
@@ -53,8 +53,8 @@ byteArray_result jsonToPacked(void* schemaPtr, const char* json, size_t len) {
 
 		return {cloneArray(os.getArray()), nullptr};
 	} catch(const std::exception &e) {
-         return {{}, strdup(e.what())};
-    }
+		return {{}, strdup(e.what())};
+	}
 }
 
 byteArray_result binaryToJson(void* schemaPtr, const char* binary, size_t len) {
@@ -71,8 +71,8 @@ byteArray_result binaryToJson(void* schemaPtr, const char* binary, size_t len) {
 
 		return {cloneArray(str.asBytes()), nullptr};
 	} catch(const std::exception &e) {
-         return {{}, strdup(e.what())};
-    }
+		return {{}, strdup(e.what())};
+	}
 }
 
 byteArray_result packedToJson(void* schemaPtr, const char* binary, size_t len) {
@@ -89,6 +89,6 @@ byteArray_result packedToJson(void* schemaPtr, const char* binary, size_t len) {
 
 		return {cloneArray(str.asBytes()), nullptr};
 	} catch(const std::exception &e) {
-         return {{}, strdup(e.what())};
-    }
+		return {{}, strdup(e.what())};
+	}
 }

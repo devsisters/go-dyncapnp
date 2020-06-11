@@ -34,8 +34,8 @@ parseSchemaFromFiles_result parseSchemaFromFiles(const struct capnpFile* files, 
 
 		return {schemas, nullptr};
 	} catch(const std::exception &e) {
-         return {nullptr, strdup(e.what())};
-    }
+		return {nullptr, strdup(e.what())};
+	}
 }
 
 findStructSchema_result findStructSchema(void* schemaPtr, char* name) {
@@ -49,8 +49,8 @@ findStructSchema_result findStructSchema(void* schemaPtr, char* name) {
 			return {nullptr, nullptr};
 		}
 	} catch(const std::exception &e) {
-         return {nullptr, strdup(e.what())};
-    }
+		return {nullptr, strdup(e.what())};
+	}
 }
 
 void releaseSchemas(void** schemasPtr, size_t schemasLen) {
