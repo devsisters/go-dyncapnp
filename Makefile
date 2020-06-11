@@ -8,3 +8,6 @@ install_capnp:
 	 && sudo make install
 
 init: install_capnp
+
+generate:
+	go generate
