@@ -1,5 +1,7 @@
 package dyncapnp
 
+//go:generate go run ./gen/imports.go
+
 /*
 #cgo CXXFLAGS: -std=c++14 -stdlib=libc++ -I${SRCDIR}/capnproto/c++/src
 #cgo LDFLAGS: -lkj -lcapnp -lcapnpc
@@ -94,11 +96,18 @@ func ParseFromFiles(files map[string][]byte, imports map[string][]byte, paths []
 		}
 	}()
 
-	cImports := C.allocFiles(C.size_t(len(imports)))
+	importLen := len(stdImports) + len(imports)
+	cImports := C.allocFiles(C.size_t(importLen))
 	defer C.free(unsafe.Pointer(cImports))
 
-	cImportSlice := (*[1 << 30]C.struct_capnpFile)(unsafe.Pointer(cImports))[:len(imports):len(imports)]
+	cImportSlice := (*[1 << 30]C.struct_capnpFile)(unsafe.Pointer(cImports))[:importLen:importLen]
 	i = 0
+	for path, content := range stdImports {
+		cImportSlice[i].path = C.CString(path)
+		cImportSlice[i].content = (*C.char)(unsafe.Pointer(&content[0]))
+		cImportSlice[i].contentLen = C.size_t(len(content))
+		i++
+	}
 	for path, content := range imports {
 		cImportSlice[i].path = C.CString(path)
 		cImportSlice[i].content = (*C.char)(unsafe.Pointer(&content[0]))
