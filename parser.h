@@ -24,9 +24,7 @@ struct findStructSchema_result {
 	const char* err;
 };
 
-struct findStructSchema_result findStructSchema(void* schemaPtr, char* name);
-
-void releaseSchemas(void** schemasPtr, size_t schemasLen);
+struct findStructSchema_result findNested(void* schemaPtr, char* name);
 
 void releaseSchema(void* schemaPtr);
 

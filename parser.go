@@ -16,60 +16,40 @@ struct capnpFile* allocFiles(size_t s) {
 import "C"
 import (
 	"fmt"
-	"os"
 	"runtime"
 	"unsafe"
 )
 
-// Parsed .capnp schema files. Should be .Release()'ed after use.
-type ParsedSchemas struct {
-	ptr   *unsafe.Pointer
-	paths map[string]unsafe.Pointer
-}
-
 var ErrSchemaNotFound = fmt.Errorf("schema not found")
 
-func (s *ParsedSchemas) Get(path string, structName string) (*Schema, error) {
-	pt, ok := s.paths[path]
-	if !ok {
-		return nil, os.ErrNotExist
-	}
+// ParsedSchema of a Cap'n'proto type. MUST not be copied. Should be .Release()'ed after use.
+type ParsedSchema struct {
+	ptr unsafe.Pointer
+}
 
-	st := C.CString(structName)
+// FindNested finds nested schema with given name. Returns ErrSchemaNotFound if nothing was found.
+func (s *ParsedSchema) Nested(name string) (*ParsedSchema, error) {
+	st := C.CString(name)
 	defer C.free(unsafe.Pointer(st))
 
-	res := C.findStructSchema(pt, st)
+	res := C.findNested(s.ptr, st)
 	if res.err != nil {
-		defer C.free(unsafe.Pointer(res.err))
-		return nil, fmt.Errorf(C.GoString(res.err))
+		err := fmt.Errorf(C.GoString(res.err))
+		C.free(unsafe.Pointer(res.err))
+		return nil, err
 	}
 	if res.schema == nil {
 		return nil, ErrSchemaNotFound
 	}
 
-	sc := &Schema{
+	sc := &ParsedSchema{
 		ptr: res.schema,
 	}
-	runtime.SetFinalizer(sc, (*Schema).Release)
+	runtime.SetFinalizer(sc, (*ParsedSchema).Release)
 	return sc, nil
 }
 
-func (s *ParsedSchemas) Release() {
-	if s.ptr == nil {
-		return
-	}
-	C.releaseSchemas(s.ptr, C.size_t(len(s.paths)))
-	s.ptr = nil
-	s.paths = nil
-	runtime.SetFinalizer(s, nil)
-}
-
-// Schema of a Cap'n'proto type. Should be .Release()'ed after use.
-type Schema struct {
-	ptr unsafe.Pointer
-}
-
-func (s *Schema) Release() {
+func (s *ParsedSchema) Release() {
 	if s.ptr == nil {
 		return
 	}
@@ -78,7 +58,7 @@ func (s *Schema) Release() {
 	runtime.SetFinalizer(s, nil)
 }
 
-func ParseFromFiles(files map[string][]byte, imports map[string][]byte, paths []string) (*ParsedSchemas, error) {
+func ParseFromFiles(files map[string][]byte, imports map[string][]byte, paths []string) (map[string]*ParsedSchema, error) {
 	cFiles := C.allocFiles(C.size_t(len(files)))
 	defer C.free(unsafe.Pointer(cFiles))
 
@@ -136,17 +116,18 @@ func ParseFromFiles(files map[string][]byte, imports map[string][]byte, paths []
 		C.free(unsafe.Pointer(res.err))
 		return nil, err
 	}
+
+	// iterate void** array and wrap them with ParsedSchema
 	cSchemasSlice := (*[1 << 30]unsafe.Pointer)(unsafe.Pointer(res.schemas))[:len(paths):len(paths)]
-
-	pathSchemas := make(map[string]unsafe.Pointer, len(paths))
+	pathSchemas := make(map[string]*ParsedSchema, len(paths))
 	for i := range paths {
-		pathSchemas[paths[i]] = cSchemasSlice[i]
+		pathSchemas[paths[i]] = &ParsedSchema{
+			ptr: cSchemasSlice[i],
+		}
 	}
 
-	ps := &ParsedSchemas{
-		ptr:   res.schemas,
-		paths: pathSchemas,
-	}
-	runtime.SetFinalizer(ps, (*ParsedSchemas).Release)
-	return ps, nil
+	// release the returned array
+	C.free(unsafe.Pointer(res.schemas))
+
+	return pathSchemas, nil
 }
