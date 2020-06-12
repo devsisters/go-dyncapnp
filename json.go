@@ -24,18 +24,18 @@ func readByteArray(res C.struct_byteArray_result) ([]byte, error) {
 	return bs, nil
 }
 
-func (s Schema) Encode(json []byte) ([]byte, error) {
+func (s ParsedSchema) Encode(json []byte) ([]byte, error) {
 	return readByteArray(C.jsonToBinary(s.ptr, (*C.char)(unsafe.Pointer(&json[0])), C.size_t(len(json))))
 }
 
-func (s Schema) EncodePacked(json []byte) ([]byte, error) {
+func (s ParsedSchema) EncodePacked(json []byte) ([]byte, error) {
 	return readByteArray(C.jsonToPacked(s.ptr, (*C.char)(unsafe.Pointer(&json[0])), C.size_t(len(json))))
 }
 
-func (s Schema) Decode(bin []byte) ([]byte, error) {
+func (s ParsedSchema) Decode(bin []byte) ([]byte, error) {
 	return readByteArray(C.binaryToJson(s.ptr, (*C.char)(unsafe.Pointer(&bin[0])), C.size_t(len(bin))))
 }
 
-func (s Schema) DecodePacked(bin []byte) ([]byte, error) {
+func (s ParsedSchema) DecodePacked(bin []byte) ([]byte, error) {
 	return readByteArray(C.packedToJson(s.ptr, (*C.char)(unsafe.Pointer(&bin[0])), C.size_t(len(bin))))
 }

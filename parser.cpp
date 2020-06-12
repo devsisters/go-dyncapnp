@@ -24,7 +24,7 @@ parseSchemaFromFiles_result parseSchemaFromFiles(const struct capnpFile* files, 
 		kj::FixedArray<const kj::ReadableDirectory*, 1> importPath;
 		importPath[0] = importDir.get();
 
-		auto schemas = new void*[pathsLen];
+		auto schemas = static_cast<void**>(malloc(sizeof(void*) * pathsLen));
 		auto p = new capnp::SchemaParser;
 		for (size_t i = 0; i < pathsLen; i++) {
 			auto schema = new capnp::ParsedSchema;
@@ -38,7 +38,7 @@ parseSchemaFromFiles_result parseSchemaFromFiles(const struct capnpFile* files, 
 	}
 }
 
-findStructSchema_result findStructSchema(void* schemaPtr, char* name) {
+findStructSchema_result findNested(void* schemaPtr, char* name) {
 	try {
 		auto schema = static_cast<capnp::ParsedSchema*>(schemaPtr);
 		KJ_IF_MAYBE(ptr, schema->findNested(name)) {
@@ -51,14 +51,6 @@ findStructSchema_result findStructSchema(void* schemaPtr, char* name) {
 	} catch(const std::exception &e) {
 		return {nullptr, strdup(e.what())};
 	}
-}
-
-void releaseSchemas(void** schemasPtr, size_t schemasLen) {
-	auto schemas = static_cast<void**>(schemasPtr);
-	for (int i = 0; i < schemasLen; i++) {
-		releaseSchema(schemas[i]);
-	}
-	delete schemas;
 }
 
 void releaseSchema(void* schemaPtr) {
