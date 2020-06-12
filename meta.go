@@ -37,6 +37,67 @@ func (m SchemaMeta) Id() uint64 {
 	return getUint64(m, "id")
 }
 
+// Name to present to humans to identify this Node. You should not attempt to parse this.
+// Its format could change. It is not guaranteed to be unique.
+func (m SchemaMeta) DisplayName() string {
+	return m["displayName"].(string)
+}
+
+// Shorter version of `DisplayName()`, chopped off by `displayNamePrefixLength`
+func (m SchemaMeta) ShortDisplayName() string {
+	prefix := getUint64(m, "displayNamePrefixLength")
+	return m.DisplayName()[prefix:]
+}
+
+func (m SchemaMeta) Type() SchemaType {
+	if _, ok := m["file"]; ok {
+		return SchemaFile
+	} else if _, ok := m["struct"]; ok {
+		return SchemaStruct
+	} else if _, ok := m["enum"]; ok {
+		return SchemaEnum
+	} else if _, ok := m["interface"]; ok {
+		return SchemaInterface
+	} else if _, ok := m["const"]; ok {
+		return SchemaConst
+	} else if _, ok := m["annotation"]; ok {
+		return SchemaAnnotation
+	} else {
+		return SchemaUnknown
+	}
+}
+
+type SchemaType uint16
+
+const (
+	SchemaFile SchemaType = iota
+	SchemaStruct
+	SchemaEnum
+	SchemaInterface
+	SchemaConst
+	SchemaAnnotation
+	SchemaUnknown
+)
+
+func (t SchemaType) String() string {
+	switch t {
+	case SchemaFile:
+		return "file"
+	case SchemaStruct:
+		return "struct"
+	case SchemaEnum:
+		return "enum"
+	case SchemaInterface:
+		return "interface"
+	case SchemaConst:
+		return "const"
+	case SchemaAnnotation:
+		return "annotation"
+	default:
+		return ""
+	}
+}
+
 func (m SchemaMeta) Annotations() []Annotation {
 	anns := m["annotations"].([]interface{})
 	res := make([]Annotation, len(anns))
