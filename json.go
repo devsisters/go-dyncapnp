@@ -9,6 +9,8 @@ package dyncapnp
 */
 import "C"
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"unsafe"
 )
@@ -22,6 +24,20 @@ func readByteArray(res C.struct_byteArray_result) ([]byte, error) {
 	bs := C.GoBytes(unsafe.Pointer(res.result.arr), C.int(res.result.length))
 	C.free(unsafe.Pointer(res.result.arr))
 	return bs, nil
+}
+
+func (s ParsedSchema) Metadata() (SchemaMeta, error) {
+	b, err := readByteArray(C.schemaToJson(s.ptr))
+	if err != nil {
+		panic(err)
+	}
+	var m SchemaMeta
+	dec := json.NewDecoder(bytes.NewBuffer(b))
+	dec.UseNumber()
+	if err := dec.Decode(&m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 func (s ParsedSchema) Encode(json []byte) ([]byte, error) {

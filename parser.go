@@ -1,6 +1,6 @@
 package dyncapnp
 
-//go:generate go run ./gen/imports.go
+//go:generate go run ./gen/
 
 /*
 #cgo CXXFLAGS: -std=c++14 -stdlib=libc++ -I${SRCDIR}/capnproto/c++/src

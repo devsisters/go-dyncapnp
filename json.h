@@ -16,6 +16,8 @@ struct byteArray_result {
 	const char* err;
 };
 
+struct byteArray_result schemaToJson(void* schemaPtr);
+
 struct byteArray_result jsonToBinary(void* schemaPtr, const char* json, size_t len);
 
 struct byteArray_result jsonToPacked(void* schemaPtr, const char* json, size_t len);
