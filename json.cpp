@@ -17,6 +17,19 @@ byteArray cloneArray(const kj::ArrayPtr<capnp::byte>& ar) {
 	return b;
 }
 
+byteArray_result schemaToJson(void* schemaPtr) {
+	try {
+		auto schema = static_cast<capnp::ParsedSchema*>(schemaPtr);
+
+		capnp::JsonCodec codec;
+		auto str = codec.encode(schema->getProto());
+
+		return {cloneArray(str.asBytes()), nullptr};
+	} catch(const std::exception &e) {
+		return {{}, strdup(e.what())};
+	}
+}
+
 byteArray_result jsonToBinary(void* schemaPtr, const char* json, size_t len) {
 	try {
 		auto schema = static_cast<capnp::ParsedSchema*>(schemaPtr);

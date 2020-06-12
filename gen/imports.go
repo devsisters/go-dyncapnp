@@ -1,13 +1,11 @@
 package main
 
 import (
+	"bytes"
+	"go/format"
 	"io/ioutil"
-	"log"
-	"os"
-	"os/exec"
 	"path/filepath"
 	"strconv"
-	"strings"
 	"text/template"
 )
 
@@ -24,35 +22,25 @@ var stdImports = map[string][]byte{
 }
 `))
 
-func main() {
+// generates imports.gen.go
+func generateImports() {
 	params := struct {
 		Version string
 		Files   map[string]string
 	}{
-		getCapnpVersion(),
+		capnpVersion,
 		readCapnpFiles(),
 	}
 
-	out, err := os.OpenFile("imports.gen.go", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+	buf := bytes.NewBuffer(nil)
+	err := outputTmpl.Execute(buf, params)
 	dieOnErr(err)
-	defer func() {
-		err := out.Close()
-		dieOnErr(err)
-	}()
-
-	err = outputTmpl.Execute(out, params)
+	formatted, err := format.Source(buf.Bytes())
+	dieOnErr(err)
+	err = ioutil.WriteFile("imports.gen.go", formatted, 0644)
 	dieOnErr(err)
 }
 
-func getCapnpVersion() string {
-	cmd := exec.Command("git", "submodule", "status", "capnproto")
-	sb := strings.Builder{}
-	cmd.Stdout = &sb
-	err := cmd.Run()
-	dieOnErr(err)
-
-	return strings.TrimSpace(sb.String())
-}
 
 func readCapnpFiles() map[string]string {
 	baseDir := filepath.Join("capnproto", "c++", "src")
@@ -70,10 +58,4 @@ func readCapnpFiles() map[string]string {
 		pathContentMap[strconv.Quote(p)] = strconv.Quote(string(b))
 	}
 	return pathContentMap
-}
-
-func dieOnErr(err error) {
-	if err != nil {
-		log.Fatal(err)
-	}
 }
