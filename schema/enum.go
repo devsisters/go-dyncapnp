@@ -1,13 +1,5 @@
 package schema
 
-/*
-#cgo CXXFLAGS: -std=c++14 -stdlib=libc++ -I${SRCDIR}/capnproto/c++/src
-#cgo LDFLAGS: -lkj -lcapnp -lcapnp-json
-
-#include <stdlib.h>
-#include "schema.h"
-*/
-import "C"
 import (
 	"runtime"
 	"unsafe"
@@ -19,40 +11,29 @@ func newEnum(ptr unsafe.Pointer) *Enum {
 	}
 }
 
-func releaseEnum(ptr unsafe.Pointer) {
-	C.releaseEnum(ptr)
-}
-
 type Enum struct {
 	*Schema
 }
 
 func (e *Enum) Enumerants() []*Enumerant {
-	list := C.enumGetEnumerants(e.ptr)
-	l := (*[1 << 30]unsafe.Pointer)(unsafe.Pointer(list.ptr))[:list.len:list.len]
-	res := make([]*Enumerant, len(l))
-	for i, ptr := range l {
+	list := enumGetEnumerants(e.ptr)
+	res := make([]*Enumerant, len(list))
+	for i, ptr := range list {
 		res[i] = newEnumerant(ptr)
 	}
-	C.free(unsafe.Pointer(list.ptr))
 	return res
 }
 
 func (e *Enum) FindByName(name string) (*Enumerant, bool) {
-	st := C.CString(name)
-	defer C.free(unsafe.Pointer(st))
-
-	res := C.enumFindEnumerantByName(e.ptr, st)
-	if res.err != nil {
-		msg := C.GoString(res.err)
-		C.free(unsafe.Pointer(res.err))
-		panic(msg)
+	ptr, err := enumFindEnumerantByName(e.ptr, name)
+	if err != nil {
+		panic(err)
 	}
-	if res.ptr == nil {
+	if ptr == nil {
 		return nil, false
 	}
 
-	return newEnumerant(res.ptr), true
+	return newEnumerant(ptr), true
 }
 
 func newEnumerant(ptr unsafe.Pointer) *Enumerant {
@@ -70,14 +51,14 @@ type Enumerant struct {
 }
 
 func (e *Enumerant) Ordinal() uint16 {
-	return uint16(C.enumerantGetOrdinal(e.ptr))
+	return enumerantGetOrdinal(e.ptr)
 }
 
 func (e *Enumerant) Release() {
 	if e != e.self {
 		panic("Schema should not be copied")
 	}
-	C.releaseEnumerant(e.ptr)
+	releaseEnumerant(e.ptr)
 	e.ptr = nil
 	runtime.SetFinalizer(e, nil)
 }

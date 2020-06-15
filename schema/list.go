@@ -1,12 +1,5 @@
 package schema
 
-/*
-#cgo CXXFLAGS: -std=c++14 -stdlib=libc++ -I${SRCDIR}/capnproto/c++/src
-#cgo LDFLAGS: -lkj -lcapnp -lcapnp-json
-
-#include "schema.h"
-*/
-import "C"
 import (
 	"runtime"
 	"unsafe"
@@ -23,38 +16,38 @@ func newList(ptr unsafe.Pointer) *List {
 
 type List struct {
 	self *List
-	ptr unsafe.Pointer
+	ptr  unsafe.Pointer
 }
 
 func (l *List) ElementType() *Type {
-	return newType(C.listGetElementType(l.ptr))
+	return newType(listGetElementType(l.ptr))
 }
 
 func (l *List) ElementTypeWhich() TypeWhich {
-	return TypeWhich(C.listWhichElementType(l.ptr))
+	return TypeWhich(listWhichElementType(l.ptr))
 }
 
 func (l *List) StructElementType() *Struct {
-	return newStruct(mustPtr(C.listGetStructElementType(l.ptr)))
+	return newStruct(mustPtr(listGetStructElementType(l.ptr)))
 }
 
 func (l *List) EnumElementType() *Enum {
-	return newEnum(mustPtr(C.listGetEnumElementType(l.ptr)))
+	return newEnum(mustPtr(listGetEnumElementType(l.ptr)))
 }
 
 func (l *List) InterfaceElementType() *Interface {
-	return newInterface(mustPtr(C.listGetInterfaceElementType(l.ptr)))
+	return newInterface(mustPtr(listGetInterfaceElementType(l.ptr)))
 }
 
 func (l *List) ListElementType() *List {
-	return newList(mustPtr(C.listGetListElementType(l.ptr)))
+	return newList(mustPtr(listGetListElementType(l.ptr)))
 }
 
 func (l *List) Release() {
 	if l != l.self {
 		panic("Schema should not be copied")
 	}
-	C.releaseListSchema(l.ptr)
+	releaseListSchema(l.ptr)
 	l.ptr = nil
 	runtime.SetFinalizer(l, nil)
 }
