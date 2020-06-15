@@ -25,16 +25,16 @@ parseSchemaFromFiles_result parseSchemaFromFiles(const struct capnpFile* files, 
 		importPath[0] = importDir.get();
 
 		auto schemas = static_cast<void**>(malloc(sizeof(void*) * pathsLen));
-		auto p = new capnp::SchemaParser;
+		auto parser = new capnp::SchemaParser;
 		for (size_t i = 0; i < pathsLen; i++) {
 			auto schema = new capnp::ParsedSchema;
-			*schema = p->parseFromDirectory(*dir, kj::Path::parse(paths[i]), importPath);
+			*schema = parser->parseFromDirectory(*dir, kj::Path::parse(paths[i]), importPath);
 			schemas[i] = static_cast<void*>(schema);
 		}
 
-		return {schemas, nullptr};
+		return {static_cast<void*>(parser), schemas, nullptr};
 	} catch(const std::exception &e) {
-		return {nullptr, strdup(e.what())};
+		return {nullptr, nullptr, strdup(e.what())};
 	}
 }
 
@@ -53,7 +53,12 @@ findStructSchema_result findNested(void* schemaPtr, char* name) {
 	}
 }
 
-void releaseSchema(void* schemaPtr) {
+void releaseParsedSchema(void* schemaPtr) {
 	auto schema = static_cast<capnp::ParsedSchema*>(schemaPtr);
 	delete schema;
+}
+
+void releaseParser(void* parserPtr) {
+	auto parser = static_cast<capnp::SchemaParser*>(parserPtr);
+	delete parser;
 }
