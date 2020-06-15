@@ -13,6 +13,7 @@ struct capnpFile {
 };
 
 struct parseSchemaFromFiles_result {
+	void* parser;
 	void** schemas;
 	const char* err;
 };
@@ -26,7 +27,8 @@ struct findStructSchema_result {
 
 struct findStructSchema_result findNested(void* schemaPtr, char* name);
 
-void releaseSchema(void* schemaPtr);
+void releaseParsedSchema(void* schemaPtr);
+void releaseParser(void* parserPtr);
 
 #ifdef __cplusplus
 }

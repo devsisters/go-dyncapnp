@@ -18,13 +18,17 @@ import (
 	"fmt"
 	"runtime"
 	"unsafe"
+
+	"github.com/WKBae/go-dyncapnp/schema"
 )
 
 var ErrSchemaNotFound = fmt.Errorf("schema not found")
 
 // ParsedSchema of a Cap'n'proto type. MUST not be copied. Should be .Release()'ed after use.
 type ParsedSchema struct {
-	ptr unsafe.Pointer
+	parser *schemaParser
+	ptr    unsafe.Pointer
+	*schema.Schema
 }
 
 // FindNested finds nested schema with given name. Returns ErrSchemaNotFound if nothing was found.
@@ -42,20 +46,20 @@ func (s *ParsedSchema) Nested(name string) (*ParsedSchema, error) {
 		return nil, ErrSchemaNotFound
 	}
 
+	s.parser.incRef()
 	sc := &ParsedSchema{
-		ptr: res.schema,
+		parser: s.parser,
+		ptr:    res.schema,
+		Schema: schema.NewWithFreer(res.schema, schema.NoFree),
 	}
 	runtime.SetFinalizer(sc, (*ParsedSchema).Release)
 	return sc, nil
 }
 
 func (s *ParsedSchema) Release() {
-	if s.ptr == nil {
-		return
-	}
-	C.releaseSchema(s.ptr)
-	s.ptr = nil
-	runtime.SetFinalizer(s, nil)
+	s.Schema.Release()
+	C.releaseParsedSchema(s.ptr)
+	s.parser.decRef()
 }
 
 func ParseFromFiles(files map[string][]byte, imports map[string][]byte, paths []string) (map[string]*ParsedSchema, error) {
@@ -119,10 +123,16 @@ func ParseFromFiles(files map[string][]byte, imports map[string][]byte, paths []
 
 	// iterate void** array and wrap them with ParsedSchema
 	cSchemasSlice := (*[1 << 30]unsafe.Pointer)(unsafe.Pointer(res.schemas))[:len(paths):len(paths)]
+	parser := &schemaParser{
+		ptr:      res.parser,
+		refCount: len(cSchemasSlice),
+	}
 	pathSchemas := make(map[string]*ParsedSchema, len(paths))
 	for i := range paths {
 		pathSchemas[paths[i]] = &ParsedSchema{
-			ptr: cSchemasSlice[i],
+			parser: parser,
+			ptr:    cSchemasSlice[i],
+			Schema: schema.NewWithFreer(cSchemasSlice[i], schema.NoFree),
 		}
 	}
 
@@ -130,4 +140,26 @@ func ParseFromFiles(files map[string][]byte, imports map[string][]byte, paths []
 	C.free(unsafe.Pointer(res.schemas))
 
 	return pathSchemas, nil
+}
+
+type schemaParser struct {
+	ptr      unsafe.Pointer
+	refCount int
+}
+
+func (p *schemaParser) incRef() {
+	if p == nil {
+		return
+	}
+	p.refCount++
+}
+
+func (p *schemaParser) decRef() {
+	if p == nil {
+		return
+	}
+	p.refCount--
+	if p.refCount < 0 {
+		C.releaseParser(p.ptr)
+	}
 }
