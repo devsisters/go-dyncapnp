@@ -1,12 +1,5 @@
 package schema
 
-/*
-#cgo CXXFLAGS: -std=c++14 -stdlib=libc++ -I${SRCDIR}/capnproto/c++/src
-#cgo LDFLAGS: -lkj -lcapnp -lcapnp-json
-
-#include "schema.h"
-*/
-import "C"
 import (
 	"runtime"
 	"unsafe"
@@ -27,30 +20,30 @@ type Type struct {
 }
 
 func (t *Type) Which() TypeWhich {
-	return TypeWhich(C.typeWhich(t.ptr))
+	return TypeWhich(typeWhich(t.ptr))
 }
 
 func (t *Type) Struct() *Struct {
-	return newStruct(mustPtr(C.typeAsStruct(t.ptr)))
+	return newStruct(mustPtr(typeAsStruct(t.ptr)))
 }
 
 func (t *Type) Enum() *Enum {
-	return newEnum(mustPtr(C.typeAsEnum(t.ptr)))
+	return newEnum(mustPtr(typeAsEnum(t.ptr)))
 }
 
 func (t *Type) List() *List {
-	return newList(mustPtr(C.typeAsList(t.ptr)))
+	return newList(mustPtr(typeAsList(t.ptr)))
 }
 
 func (t *Type) Interface() *Interface {
-	return newInterface(mustPtr(C.typeAsInterface(t.ptr)))
+	return newInterface(mustPtr(typeAsInterface(t.ptr)))
 }
 
 func (t *Type) Release() {
 	if t != t.self {
 		panic("Schema should not be copied")
 	}
-	C.releaseType(t.ptr)
+	releaseType(t.ptr)
 	t.ptr = nil
 	runtime.SetFinalizer(t, nil)
 }
