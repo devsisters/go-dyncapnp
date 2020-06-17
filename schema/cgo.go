@@ -1,7 +1,7 @@
 package schema
 
 /*
-#cgo CXXFLAGS: -std=c++14 -stdlib=libc++ -I${SRCDIR}/capnproto/c++/src
+#cgo CXXFLAGS: -std=c++14 -I${SRCDIR}/capnproto/c++/src
 #cgo LDFLAGS: -lkj -lcapnp -lcapnp-json
 
 #include <stdlib.h>
