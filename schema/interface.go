@@ -13,3 +13,7 @@ func newInterface(ptr unsafe.Pointer) *Interface {
 type Interface struct {
 	*Schema
 }
+
+func (s *Interface) Type() *Type {
+	return newType(mustPtr(typeFromInterfaceSchema(s.ptr)))
+}

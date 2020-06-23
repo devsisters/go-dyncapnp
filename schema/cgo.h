@@ -56,6 +56,11 @@ byteArray_result structFieldToJson(void* structFieldPtr);
 void releaseStructSchemaField(void* structFieldPtr);
 
 // Type
+pointer_result typeFromPrimitive(uint16_t which);
+pointer_result typeFromStructSchema(void* structSchemaPtr);
+pointer_result typeFromEnumSchema(void* enumSchemaPtr);
+pointer_result typeFromInterfaceSchema(void* interfaceSchemaPtr);
+pointer_result typeFromListSchema(void* listSchemaPtr);
 uint16_t typeWhich(void* typePtr);
 pointer_result typeAsStruct(void* typePtr);
 pointer_result typeAsEnum(void* typePtr);

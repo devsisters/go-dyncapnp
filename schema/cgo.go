@@ -107,6 +107,26 @@ func releaseStructSchemaField(structFieldPtr unsafe.Pointer) {
 
 // Type
 
+func typeFromPrimitive(which uint16) (unsafe.Pointer, error) {
+	return readPointerResult(C.typeFromPrimitive(C.uint16_t(which)))
+}
+
+func typeFromStructSchema(structSchemaPtr unsafe.Pointer) (unsafe.Pointer, error) {
+	return readPointerResult(C.typeFromStructSchema(structSchemaPtr))
+}
+
+func typeFromEnumSchema(enumSchemaPtr unsafe.Pointer) (unsafe.Pointer, error) {
+	return readPointerResult(C.typeFromEnumSchema(enumSchemaPtr))
+}
+
+func typeFromInterfaceSchema(interfaceSchemaPtr unsafe.Pointer) (unsafe.Pointer, error) {
+	return readPointerResult(C.typeFromInterfaceSchema(interfaceSchemaPtr))
+}
+
+func typeFromListSchema(listSchemaPtr unsafe.Pointer) (unsafe.Pointer, error) {
+	return readPointerResult(C.typeFromListSchema(listSchemaPtr))
+}
+
 func typeWhich(typePtr unsafe.Pointer) uint16 {
 	return uint16(C.typeWhich(typePtr))
 }
