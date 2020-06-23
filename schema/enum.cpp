@@ -18,21 +18,21 @@ pointerList enumGetEnumerants(void* enumPtr) {
 pointer_result enumFindEnumerantByName(void* enumPtr, const char* name) {
 	try {
 		auto enu = static_cast<capnp::EnumSchema*>(enumPtr);
-        KJ_IF_MAYBE(ptr, enu->findEnumerantByName(name)) {
-            auto enumerant = new capnp::EnumSchema::Enumerant;
-            *enumerant = *ptr;
-            return {static_cast<void*>(enumerant), nullptr};
-        } else {
-            return {nullptr, nullptr};
-        }
-    } catch(const std::exception &e) {
-        return {nullptr, strdup(e.what())};
-    }
+		KJ_IF_MAYBE(ptr, enu->findEnumerantByName(name)) {
+			auto enumerant = new capnp::EnumSchema::Enumerant;
+			*enumerant = *ptr;
+			return {static_cast<void*>(enumerant), nullptr};
+		} else {
+			return {nullptr, nullptr};
+		}
+	} catch(const std::exception &e) {
+		return {nullptr, strdup(e.what())};
+	}
 }
 
 void releaseEnum(void* enumPtr) {
-    auto enu = static_cast<capnp::EnumSchema*>(enumPtr);
-    delete enu;
+	auto enu = static_cast<capnp::EnumSchema*>(enumPtr);
+	delete enu;
 }
 
 uint16_t enumerantGetOrdinal(void* enumerantPtr) {
@@ -41,6 +41,6 @@ uint16_t enumerantGetOrdinal(void* enumerantPtr) {
 }
 
 void releaseEnumerant(void* enumerantPtr) {
-    auto enumerant = static_cast<capnp::EnumSchema::Enumerant*>(enumerantPtr);
-    delete enumerant;
+	auto enumerant = static_cast<capnp::EnumSchema::Enumerant*>(enumerantPtr);
+	delete enumerant;
 }
