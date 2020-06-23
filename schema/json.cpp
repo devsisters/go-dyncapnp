@@ -29,6 +29,19 @@ byteArray_result schemaToJson(void* schemaPtr) {
 	}
 }
 
+byteArray_result structFieldToJson(void* structFieldPtr) {
+	try {
+		auto field = static_cast<capnp::StructSchema::Field*>(structFieldPtr);
+
+		capnp::JsonCodec codec;
+		auto str = codec.encode(field->getProto());
+
+		return {cloneArray(str.asBytes()), nullptr};
+	} catch(const std::exception &e) {
+		return {{}, strdup(e.what())};
+	}
+}
+
 byteArray_result structJsonToBinary(void* schemaPtr, const char* json, size_t len) {
 	try {
 		auto schema = static_cast<capnp::StructSchema*>(schemaPtr);

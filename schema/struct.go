@@ -1,8 +1,12 @@
 package schema
 
 import (
+	"bytes"
+	"encoding/json"
 	"runtime"
 	"unsafe"
+
+	"github.com/WKBae/go-dyncapnp/schema/proto"
 )
 
 func newStruct(ptr unsafe.Pointer) *Struct {
@@ -81,6 +85,20 @@ func newStructField(ptr unsafe.Pointer) *StructField {
 type StructField struct {
 	self *StructField
 	ptr  unsafe.Pointer
+}
+
+func (f *StructField) Proto() (proto.Field, error) {
+	b, err := structFieldToJson(f.ptr)
+	if err != nil {
+		return nil, err
+	}
+	var m proto.Field
+	dec := json.NewDecoder(bytes.NewBuffer(b))
+	dec.UseNumber()
+	if err := dec.Decode(&m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 func (f *StructField) Parent() *Struct {
