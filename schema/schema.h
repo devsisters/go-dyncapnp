@@ -39,6 +39,9 @@ void releaseSchema(void* schemaPtr);
 
 // StructSchema
 pointerList structGetFields(void* structSchemaPtr);
+pointerList structGetUnionFields(void* structSchemaPtr);
+pointerList structGetNonUnionFields(void* structSchemaPtr);
+pointer_result structFindFieldByName(void* structSchemaPtr, const char* name);
 byteArray_result structJsonToBinary(void* structSchemaPtr, const char* json, size_t len);
 byteArray_result structJsonToPacked(void* structSchemaPtr, const char* json, size_t len);
 byteArray_result structBinaryToJson(void* structSchemaPtr, const char* binary, size_t len);

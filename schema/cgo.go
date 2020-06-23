@@ -49,6 +49,20 @@ func structGetFields(structSchemaPtr unsafe.Pointer) []unsafe.Pointer {
 	return readPointerList(C.structGetFields(structSchemaPtr))
 }
 
+func structGetUnionFields(structSchemaPtr unsafe.Pointer) []unsafe.Pointer {
+	return readPointerList(C.structGetUnionFields(structSchemaPtr))
+}
+
+func structGetNonUnionFields(structSchemaPtr unsafe.Pointer) []unsafe.Pointer {
+	return readPointerList(C.structGetNonUnionFields(structSchemaPtr))
+}
+
+func structFindFieldByName(structSchemaPtr unsafe.Pointer, name string) (unsafe.Pointer, error) {
+	st := C.CString(name)
+	defer C.free(unsafe.Pointer(st))
+	return readPointerResult(C.structFindFieldByName(structSchemaPtr, st))
+}
+
 func structJsonToBinary(structSchemaPtr unsafe.Pointer, json []byte) ([]byte, error) {
 	return readByteArray(C.structJsonToBinary(structSchemaPtr, (*C.char)(unsafe.Pointer(&json[0])), C.size_t(len(json))))
 }

@@ -24,6 +24,35 @@ func (s *Struct) Fields() []*StructField {
 	return res
 }
 
+func (s *Struct) UnionFields() []*StructField {
+	list := structGetUnionFields(s.ptr)
+	res := make([]*StructField, len(list))
+	for i, ptr := range list {
+		res[i] = newStructField(ptr)
+	}
+	return res
+}
+
+func (s *Struct) NonUnionFields() []*StructField {
+	list := structGetNonUnionFields(s.ptr)
+	res := make([]*StructField, len(list))
+	for i, ptr := range list {
+		res[i] = newStructField(ptr)
+	}
+	return res
+}
+
+func (s *Struct) Field(name string) (*StructField, bool) {
+	fieldPtr, err := structFindFieldByName(s.ptr, name)
+	if err != nil {
+		panic(err)
+	}
+	if fieldPtr == nil {
+		return nil, false
+	}
+	return newStructField(fieldPtr), true
+}
+
 func (s *Struct) Encode(json []byte) ([]byte, error) {
 	return structJsonToBinary(s.ptr, json)
 }
