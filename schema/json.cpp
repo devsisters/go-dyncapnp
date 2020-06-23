@@ -5,7 +5,7 @@
 #include <capnp/serialize.h>
 #include <capnp/serialize-packed.h>
 #include <capnp/compat/json.h>
-#include "schema.h"
+#include "cgo.h"
 
 byteArray cloneArray(const kj::ArrayPtr<capnp::byte>& ar) {
 	auto arr = ar.asChars();

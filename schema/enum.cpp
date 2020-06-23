@@ -1,7 +1,7 @@
 #include <cstdlib>
 #include <exception>
 #include <capnp/schema.h>
-#include "schema.h"
+#include "cgo.h"
 
 pointerList enumGetEnumerants(void* enumPtr) {
 	auto enu = static_cast<capnp::EnumSchema*>(enumPtr);

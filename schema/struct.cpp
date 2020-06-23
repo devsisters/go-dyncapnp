@@ -1,7 +1,7 @@
 #include <cstdlib>
 #include <exception>
 #include <capnp/schema.h>
-#include "schema.h"
+#include "cgo.h"
 
 template <typename T>
 pointerList listToPointers(T orig) {

@@ -1,6 +1,6 @@
 #include <exception>
 #include <capnp/schema.h>
-#include "schema.h"
+#include "cgo.h"
 
 uint16_t typeWhich(void* typePtr) {
 	auto type = static_cast<capnp::Type*>(typePtr);

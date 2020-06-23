@@ -5,7 +5,7 @@ package schema
 #cgo LDFLAGS: -lkj -lcapnp -lcapnp-json
 
 #include <stdlib.h>
-#include "schema.h"
+#include "cgo.h"
 */
 import "C"
 import (
