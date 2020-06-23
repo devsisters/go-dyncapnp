@@ -97,6 +97,10 @@ func structFieldGetType(structFieldPtr unsafe.Pointer) unsafe.Pointer {
 	return C.structFieldGetType(structFieldPtr)
 }
 
+func structFieldToJson(structFieldPtr unsafe.Pointer) ([]byte, error) {
+	return readByteArray(C.structFieldToJson(structFieldPtr))
+}
+
 func releaseStructSchemaField(structFieldPtr unsafe.Pointer) {
 	C.releaseStructSchemaField(structFieldPtr)
 }

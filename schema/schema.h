@@ -52,6 +52,7 @@ void releaseStructSchema(void* structSchemaPtr);
 void* structFieldGetContainingStruct(void* structFieldPtr);
 int structFieldGetIndex(void* structFieldPtr);
 void* structFieldGetType(void* structFieldPtr);
+byteArray_result structFieldToJson(void* structFieldPtr);
 void releaseStructSchemaField(void* structFieldPtr);
 
 // Type
