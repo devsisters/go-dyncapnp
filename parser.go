@@ -46,6 +46,11 @@ func (s *ParsedSchema) Release() {
 }
 
 func ParseFromFiles(files map[string][]byte, imports map[string][]byte, paths []string) (map[string]*ParsedSchema, error) {
+	// no need to parse if paths is empty
+	if len(paths) == 0 {
+		return nil, nil
+	}
+
 	// prepend standard imports
 	importsWithStd := make(map[string][]byte, len(stdImports)+len(imports))
 	for p, b := range stdImports {

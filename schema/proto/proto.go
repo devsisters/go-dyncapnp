@@ -99,7 +99,11 @@ func (t SchemaType) String() string {
 }
 
 func (m Proto) Annotations() []Annotation {
-	anns := m["annotations"].([]interface{})
+	annsIface, ok := m["annotations"]
+	if !ok {
+		return nil
+	}
+	anns := annsIface.([]interface{})
 	res := make([]Annotation, len(anns))
 	for i, ann := range anns {
 		ann := ann.(map[string]interface{})
@@ -126,7 +130,11 @@ func (f Field) CodeOrder() uint16 {
 }
 
 func (f Field) Annotations() []Annotation {
-	anns := f["annotations"].([]interface{})
+	annsIface, ok := f["annotations"]
+	if !ok {
+		return nil
+	}
+	anns := annsIface.([]interface{})
 	res := make([]Annotation, len(anns))
 	for i, ann := range anns {
 		ann := ann.(map[string]interface{})
