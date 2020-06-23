@@ -14,6 +14,10 @@ func newType(ptr unsafe.Pointer) *Type {
 	return t
 }
 
+func TypeOf(primitive TypeWhich) *Type {
+	return newType(mustPtr(typeFromPrimitive(uint16(primitive))))
+}
+
 type Type struct {
 	self *Type
 	ptr  unsafe.Pointer
@@ -114,5 +118,27 @@ func (t TypeWhich) String() string {
 		return "anyPointer"
 	default:
 		return ""
+	}
+}
+
+func (t TypeWhich) IsPrimitive() bool {
+	switch t {
+	case TypeVoid,
+		TypeBool,
+		TypeInt8,
+		TypeInt16,
+		TypeInt32,
+		TypeInt64,
+		TypeUint8,
+		TypeUint16,
+		TypeUint32,
+		TypeUint64,
+		TypeFloat32,
+		TypeFloat64,
+		TypeText,
+		TypeData:
+		return true
+	default:
+		return false
 	}
 }

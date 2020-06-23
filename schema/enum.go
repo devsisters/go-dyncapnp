@@ -15,6 +15,10 @@ type Enum struct {
 	*Schema
 }
 
+func (e *Enum) Type() *Type {
+	return newType(mustPtr(typeFromEnumSchema(e.ptr)))
+}
+
 func (e *Enum) Enumerants() []*Enumerant {
 	list := enumGetEnumerants(e.ptr)
 	res := make([]*Enumerant, len(list))

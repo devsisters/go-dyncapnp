@@ -19,6 +19,10 @@ type List struct {
 	ptr  unsafe.Pointer
 }
 
+func (s *List) Type() *Type {
+	return newType(mustPtr(typeFromListSchema(s.ptr)))
+}
+
 func (l *List) ElementType() *Type {
 	return newType(listGetElementType(l.ptr))
 }

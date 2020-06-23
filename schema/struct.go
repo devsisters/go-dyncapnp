@@ -19,6 +19,10 @@ type Struct struct {
 	*Schema
 }
 
+func (s *Struct) Type() *Type {
+	return newType(mustPtr(typeFromStructSchema(s.ptr)))
+}
+
 func (s *Struct) Fields() []*StructField {
 	list := structGetFields(s.ptr)
 	res := make([]*StructField, len(list))
