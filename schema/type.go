@@ -23,19 +23,19 @@ func (t *Type) Which() TypeWhich {
 	return TypeWhich(typeWhich(t.ptr))
 }
 
-func (t *Type) Struct() *Struct {
+func (t *Type) AsStruct() *Struct {
 	return newStruct(mustPtr(typeAsStruct(t.ptr)))
 }
 
-func (t *Type) Enum() *Enum {
+func (t *Type) AsEnum() *Enum {
 	return newEnum(mustPtr(typeAsEnum(t.ptr)))
 }
 
-func (t *Type) List() *List {
+func (t *Type) AsList() *List {
 	return newList(mustPtr(typeAsList(t.ptr)))
 }
 
-func (t *Type) Interface() *Interface {
+func (t *Type) AsInterface() *Interface {
 	return newInterface(mustPtr(typeAsInterface(t.ptr)))
 }
 

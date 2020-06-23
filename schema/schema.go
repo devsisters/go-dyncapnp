@@ -51,19 +51,19 @@ func (s *Schema) Generic() *Schema {
 	return New(schemaGetGeneric(s.ptr))
 }
 
-func (s *Schema) Struct() *Struct {
+func (s *Schema) AsStruct() *Struct {
 	return newStruct(schemaAsStruct(s.ptr))
 }
 
-func (s *Schema) Enum() *Enum {
+func (s *Schema) AsEnum() *Enum {
 	return newEnum(schemaAsEnum(s.ptr))
 }
 
-func (s *Schema) Interface() *Interface {
+func (s *Schema) AsInterface() *Interface {
 	return newInterface(schemaAsInterface(s.ptr))
 }
 
-func (s *Schema) Const() *Const {
+func (s *Schema) AsConst() *Const {
 	return newConst(schemaAsConst(s.ptr))
 }
 
