@@ -27,19 +27,19 @@ func (l *List) ElementTypeWhich() TypeWhich {
 	return TypeWhich(listWhichElementType(l.ptr))
 }
 
-func (l *List) StructElementType() *Struct {
+func (l *List) ElementTypeAsStruct() *Struct {
 	return newStruct(mustPtr(listGetStructElementType(l.ptr)))
 }
 
-func (l *List) EnumElementType() *Enum {
+func (l *List) ElementTypeAsEnum() *Enum {
 	return newEnum(mustPtr(listGetEnumElementType(l.ptr)))
 }
 
-func (l *List) InterfaceElementType() *Interface {
+func (l *List) ElementTypeAsInterface() *Interface {
 	return newInterface(mustPtr(listGetInterfaceElementType(l.ptr)))
 }
 
-func (l *List) ListElementType() *List {
+func (l *List) ElementTypeAsList() *List {
 	return newList(mustPtr(listGetListElementType(l.ptr)))
 }
 
