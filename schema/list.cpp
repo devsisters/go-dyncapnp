@@ -1,6 +1,6 @@
 #include <exception>
 #include <capnp/schema.h>
-#include "schema.h"
+#include "cgo.h"
 
 void* listGetElementType(void* listPtr) {
 	auto list = static_cast<capnp::ListSchema*>(listPtr);
