@@ -67,6 +67,20 @@ func (m Proto) Type() SchemaType {
 	}
 }
 
+func (m Proto) NestedNodes() []NestedNode {
+	if n, ok := m["nestedNodes"]; ok {
+		list := n.([]interface{})
+		nodes := make([]NestedNode, len(list))
+		for i, iface := range list {
+			nodes[i] = iface.(map[string]interface{})
+		}
+
+		return nodes
+	}
+
+	return nil
+}
+
 type SchemaType uint16
 
 const (
@@ -184,3 +198,13 @@ func (s Slot) HadExplicitDefault() bool {
 }
 
 type Type map[string]interface{}
+
+type NestedNode map[string]interface{}
+
+func (n NestedNode) Id() uint64 {
+	return getUint64(n, "id")
+}
+
+func (n NestedNode) Name() string {
+	return n["name"].(string)
+}
