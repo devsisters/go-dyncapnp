@@ -9,18 +9,18 @@ func newList(ptr unsafe.Pointer) *List {
 	l := &List{
 		ptr: ptr,
 	}
-	l.self = l
 	runtime.SetFinalizer(l, (*List).Release)
 	return l
 }
 
 type List struct {
-	self *List
-	ptr  unsafe.Pointer
+	ptr unsafe.Pointer
+
+	noCopy noCopy
 }
 
-func (s *List) Type() *Type {
-	return newType(mustPtr(typeFromListSchema(s.ptr)))
+func (l *List) Type() *Type {
+	return newType(mustPtr(typeFromListSchema(l.ptr)))
 }
 
 func (l *List) ElementType() *Type {
@@ -48,9 +48,6 @@ func (l *List) ElementTypeAsList() *List {
 }
 
 func (l *List) Release() {
-	if l != l.self {
-		panic("Schema should not be copied")
-	}
 	releaseListSchema(l.ptr)
 	l.ptr = nil
 	runtime.SetFinalizer(l, nil)

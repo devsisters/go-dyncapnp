@@ -81,14 +81,14 @@ func newStructField(ptr unsafe.Pointer) *StructField {
 	s := &StructField{
 		ptr: ptr,
 	}
-	s.self = s
 	runtime.SetFinalizer(s, (*StructField).Release)
 	return s
 }
 
 type StructField struct {
-	self *StructField
-	ptr  unsafe.Pointer
+	ptr unsafe.Pointer
+
+	noCopy noCopy
 }
 
 func (f *StructField) Proto() (proto.Field, error) {
@@ -118,9 +118,6 @@ func (f *StructField) Type() *Type {
 }
 
 func (f *StructField) Release() {
-	if f != f.self {
-		panic("Schema should not be copied")
-	}
 	releaseStructSchemaField(f.ptr)
 	f.ptr = nil
 	runtime.SetFinalizer(f, nil)

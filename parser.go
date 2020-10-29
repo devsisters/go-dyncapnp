@@ -12,11 +12,18 @@ import (
 
 var ErrSchemaNotFound = fmt.Errorf("schema not found")
 
+type noCopy struct{}
+
+func (*noCopy) Lock()   {}
+func (*noCopy) Unlock() {}
+
 // ParsedSchema of a Cap'n'proto type. MUST not be copied. Should be .Release()'ed after use.
 type ParsedSchema struct {
 	parser *schemaParser
 	ptr    unsafe.Pointer
 	*schema.Schema
+
+	noCopy noCopy
 }
 
 // FindNested finds nested schema with given name. Returns ErrSchemaNotFound if nothing was found.
@@ -85,6 +92,8 @@ func ParseFromFiles(files map[string][]byte, imports map[string][]byte, paths []
 type schemaParser struct {
 	ptr      unsafe.Pointer
 	refCount int
+
+	noCopy noCopy
 }
 
 func (p *schemaParser) incRef() {
