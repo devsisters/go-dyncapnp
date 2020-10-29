@@ -9,7 +9,6 @@ func newType(ptr unsafe.Pointer) *Type {
 	t := &Type{
 		ptr: ptr,
 	}
-	t.self = t
 	runtime.SetFinalizer(t, (*Type).Release)
 	return t
 }
@@ -19,8 +18,9 @@ func TypeOf(primitive TypeWhich) *Type {
 }
 
 type Type struct {
-	self *Type
-	ptr  unsafe.Pointer
+	ptr unsafe.Pointer
+
+	noCopy noCopy
 }
 
 func (t *Type) Which() TypeWhich {
@@ -44,9 +44,6 @@ func (t *Type) AsInterface() *Interface {
 }
 
 func (t *Type) Release() {
-	if t != t.self {
-		panic("Schema should not be copied")
-	}
 	releaseType(t.ptr)
 	t.ptr = nil
 	runtime.SetFinalizer(t, nil)

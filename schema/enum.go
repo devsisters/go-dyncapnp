@@ -44,14 +44,14 @@ func newEnumerant(ptr unsafe.Pointer) *Enumerant {
 	s := &Enumerant{
 		ptr: ptr,
 	}
-	s.self = s
 	runtime.SetFinalizer(s, (*Enumerant).Release)
 	return s
 }
 
 type Enumerant struct {
-	self *Enumerant
-	ptr  unsafe.Pointer
+	ptr unsafe.Pointer
+
+	noCopy noCopy
 }
 
 func (e *Enumerant) Ordinal() uint16 {
@@ -59,9 +59,6 @@ func (e *Enumerant) Ordinal() uint16 {
 }
 
 func (e *Enumerant) Release() {
-	if e != e.self {
-		panic("Schema should not be copied")
-	}
 	releaseEnumerant(e.ptr)
 	e.ptr = nil
 	runtime.SetFinalizer(e, nil)

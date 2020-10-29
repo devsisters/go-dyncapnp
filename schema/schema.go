@@ -22,15 +22,20 @@ func NewWithFreer(ptr unsafe.Pointer, free Freer) *Schema {
 		ptr:  ptr,
 		free: free,
 	}
-	s.self = s
 	runtime.SetFinalizer(s, (*Schema).Release)
 	return s
 }
 
+type noCopy struct{}
+
+func (*noCopy) Lock()   {}
+func (*noCopy) Unlock() {}
+
 type Schema struct {
-	self *Schema
 	ptr  unsafe.Pointer
 	free Freer
+
+	noCopy noCopy
 }
 
 func (s *Schema) Proto() (proto.Proto, error) {
@@ -68,10 +73,6 @@ func (s *Schema) AsConst() *Const {
 }
 
 func (s *Schema) Release() {
-	if s != s.self {
-		panic("Schema should not be copied")
-	}
-
 	s.free(s.ptr)
 	s.ptr = nil
 	runtime.SetFinalizer(s, nil)
