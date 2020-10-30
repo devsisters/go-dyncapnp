@@ -44,7 +44,7 @@ func newEnumerant(ptr unsafe.Pointer) *Enumerant {
 	s := &Enumerant{
 		ptr: ptr,
 	}
-	runtime.SetFinalizer(s, (*Enumerant).Release)
+	runtime.SetFinalizer(s, (*Enumerant).release)
 	return s
 }
 
@@ -58,7 +58,7 @@ func (e *Enumerant) Ordinal() uint16 {
 	return enumerantGetOrdinal(e.ptr)
 }
 
-func (e *Enumerant) Release() {
+func (e *Enumerant) release() {
 	releaseEnumerant(e.ptr)
 	e.ptr = nil
 	runtime.SetFinalizer(e, nil)

@@ -81,7 +81,7 @@ func newStructField(ptr unsafe.Pointer) *StructField {
 	s := &StructField{
 		ptr: ptr,
 	}
-	runtime.SetFinalizer(s, (*StructField).Release)
+	runtime.SetFinalizer(s, (*StructField).release)
 	return s
 }
 
@@ -117,7 +117,7 @@ func (f *StructField) Type() *Type {
 	return newType(structFieldGetType(f.ptr))
 }
 
-func (f *StructField) Release() {
+func (f *StructField) release() {
 	releaseStructSchemaField(f.ptr)
 	f.ptr = nil
 	runtime.SetFinalizer(f, nil)

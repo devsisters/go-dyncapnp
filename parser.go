@@ -17,7 +17,7 @@ type noCopy struct{}
 func (*noCopy) Lock()   {}
 func (*noCopy) Unlock() {}
 
-// ParsedSchema of a Cap'n'proto type. MUST not be copied. Should be .Release()'ed after use.
+// ParsedSchema of a Cap'n'proto type. Should not be copied.
 type ParsedSchema struct {
 	parser *schemaParser
 	ptr    unsafe.Pointer
@@ -40,14 +40,13 @@ func (s *ParsedSchema) Nested(name string) (*ParsedSchema, error) {
 	sc := &ParsedSchema{
 		parser: s.parser,
 		ptr:    ptr,
-		Schema: schema.NewWithFreer(ptr, schema.NoFree),
+		Schema: schema.NewWithFreer(ptr, nil),
 	}
-	runtime.SetFinalizer(sc, (*ParsedSchema).Release)
+	runtime.SetFinalizer(sc, (*ParsedSchema).release)
 	return sc, nil
 }
 
-func (s *ParsedSchema) Release() {
-	s.Schema.Release()
+func (s *ParsedSchema) release() {
 	releaseParsedSchema(s.ptr)
 	s.parser.decRef()
 }
@@ -82,7 +81,7 @@ func ParseFromFiles(files map[string][]byte, imports map[string][]byte, paths []
 		pathSchemas[path] = &ParsedSchema{
 			parser: parser,
 			ptr:    schemaPtrs[i],
-			Schema: schema.NewWithFreer(schemaPtrs[i], schema.NoFree),
+			Schema: schema.NewWithFreer(schemaPtrs[i], nil),
 		}
 	}
 
