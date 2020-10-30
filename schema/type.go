@@ -9,7 +9,7 @@ func newType(ptr unsafe.Pointer) *Type {
 	t := &Type{
 		ptr: ptr,
 	}
-	runtime.SetFinalizer(t, (*Type).Release)
+	runtime.SetFinalizer(t, (*Type).release)
 	return t
 }
 
@@ -43,7 +43,7 @@ func (t *Type) AsInterface() *Interface {
 	return newInterface(mustPtr(typeAsInterface(t.ptr)))
 }
 
-func (t *Type) Release() {
+func (t *Type) release() {
 	releaseType(t.ptr)
 	t.ptr = nil
 	runtime.SetFinalizer(t, nil)

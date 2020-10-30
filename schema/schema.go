@@ -11,8 +11,6 @@ import (
 
 type Freer func(ptr unsafe.Pointer)
 
-func NoFree(_ unsafe.Pointer) {}
-
 func New(ptr unsafe.Pointer) *Schema {
 	return NewWithFreer(ptr, releaseSchema)
 }
@@ -22,7 +20,9 @@ func NewWithFreer(ptr unsafe.Pointer, free Freer) *Schema {
 		ptr:  ptr,
 		free: free,
 	}
-	runtime.SetFinalizer(s, (*Schema).Release)
+	if free != nil {
+		runtime.SetFinalizer(s, (*Schema).release)
+	}
 	return s
 }
 
@@ -72,7 +72,7 @@ func (s *Schema) AsConst() *Const {
 	return newConst(schemaAsConst(s.ptr))
 }
 
-func (s *Schema) Release() {
+func (s *Schema) release() {
 	s.free(s.ptr)
 	s.ptr = nil
 	runtime.SetFinalizer(s, nil)

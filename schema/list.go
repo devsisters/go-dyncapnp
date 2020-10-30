@@ -9,7 +9,7 @@ func newList(ptr unsafe.Pointer) *List {
 	l := &List{
 		ptr: ptr,
 	}
-	runtime.SetFinalizer(l, (*List).Release)
+	runtime.SetFinalizer(l, (*List).release)
 	return l
 }
 
@@ -47,7 +47,7 @@ func (l *List) ElementTypeAsList() *List {
 	return newList(mustPtr(listGetListElementType(l.ptr)))
 }
 
-func (l *List) Release() {
+func (l *List) release() {
 	releaseListSchema(l.ptr)
 	l.ptr = nil
 	runtime.SetFinalizer(l, nil)
