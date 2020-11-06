@@ -55,13 +55,14 @@ func filesToCapnpFiles(files map[string][]byte) (*C.struct_capnpFile, func()) {
 	i := 0
 	for path, content := range files {
 		cFileSlice[i].path = C.CString(path)
-		cFileSlice[i].content = (*C.char)(unsafe.Pointer(&content[0]))
+		cFileSlice[i].content = (*C.char)(C.CBytes(content))
 		cFileSlice[i].contentLen = C.size_t(len(content))
 		i++
 	}
 
 	return cFiles, func() {
 		for _, f := range cFileSlice {
+			C.free(unsafe.Pointer(f.content))
 			C.free(unsafe.Pointer(f.path))
 		}
 		C.free(unsafe.Pointer(cFiles))
