@@ -7,7 +7,7 @@ import (
 	"runtime"
 	"unsafe"
 
-	"github.com/WKBae/go-dyncapnp/schema"
+	"github.com/devsisters/go-dyncapnp/schema"
 )
 
 var ErrSchemaNotFound = fmt.Errorf("schema not found")

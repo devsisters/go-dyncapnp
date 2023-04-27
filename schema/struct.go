@@ -6,7 +6,7 @@ import (
 	"runtime"
 	"unsafe"
 
-	"github.com/WKBae/go-dyncapnp/schema/proto"
+	"github.com/devsisters/go-dyncapnp/schema/proto"
 )
 
 func newStruct(ptr unsafe.Pointer) *Struct {
