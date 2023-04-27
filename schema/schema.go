@@ -72,6 +72,10 @@ func (s *Schema) AsConst() *Const {
 	return newConst(schemaAsConst(s.ptr))
 }
 
+func (s *Schema) ShortDisplayName() string {
+	return schemaGetShortDisplayName(s.ptr)
+}
+
 func (s *Schema) release() {
 	s.free(s.ptr)
 	s.ptr = nil
