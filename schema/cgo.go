@@ -35,6 +35,10 @@ func schemaAsConst(schemaPtr unsafe.Pointer) unsafe.Pointer {
 	return C.schemaAsConst(schemaPtr)
 }
 
+func schemaGetShortDisplayName(schemaPtr unsafe.Pointer) string {
+	return C.GoString(C.schemaGetShortDisplayName(schemaPtr))
+}
+
 func schemaToJson(schemaPtr unsafe.Pointer) ([]byte, error) {
 	return readByteArray(C.schemaToJson(schemaPtr))
 }

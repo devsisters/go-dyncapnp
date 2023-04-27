@@ -36,6 +36,11 @@ void* schemaAsConst(void* schemaPtr) {
 	return static_cast<void*>(newSchema);
 }
 
+const char* schemaGetShortDisplayName(void* schemaPtr) {
+  auto schema = static_cast<capnp::Schema*>(schemaPtr);
+  return schema->getShortDisplayName().cStr();
+}
+
 void releaseSchema(void* schemaPtr) {
 	auto schema = static_cast<capnp::Schema*>(schemaPtr);
 	delete schema;

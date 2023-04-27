@@ -34,6 +34,7 @@ void* schemaAsStruct(void* schemaPtr);
 void* schemaAsEnum(void* schemaPtr);
 void* schemaAsInterface(void* schemaPtr);
 void* schemaAsConst(void* schemaPtr);
+const char* schemaGetShortDisplayName(void* schemaPtr);
 byteArray_result schemaToJson(void* schemaPtr);
 void releaseSchema(void* schemaPtr);
 
